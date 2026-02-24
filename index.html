@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>не стена и не икс</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background: #fafafa;
+      color: #111;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      padding: 30px 0 20px;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      font-weight: 300;
+      font-size: 24px;
+      letter-spacing: 1px;
+    }
+
+    .tweet {
+      padding: 20px 0;
+      border-bottom: 1px solid #eee;
+      position: relative;
+    }
+
+    .tweet:last-child {
+      border-bottom: none;
+    }
+
+    .tweet-content {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 8px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .timestamp {
+      color: #888;
+      font-size: 14px;
+      font-weight: 300;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+      font-size: 18px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <h1>не стена или икс</h1>
+  </div>
+
+  <div id="tweetsContainer"></div>
+
+  <script>
+    const MAX_CHARS = 280;
+    let tweets = [];
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const tweetsContainer = document.getElementById('tweetsContainer');
+
+      renderTweets();
+
+      function renderTweets() {
+        if (tweets.length === 0) {
+          tweetsContainer.innerHTML = '<div class="empty-state">Пока нет сообщений</div>';
+          return;
+        }
+
+        tweetsContainer.innerHTML = '';
+
+        tweets.forEach(tweet => {
+          const tweetElement = document.createElement('div');
+          tweetElement.className = 'tweet';
+
+          const date = new Date(tweet.timestamp);
+          const now = new Date();
+          const diffTime = Math.abs(now - date);
+          const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+
+          let timeString;
+          if (diffHours < 1) {
+            timeString = 'только что';
+          } else if (diffHours < 24) {
+            timeString = `${diffHours} ч. назад`;
+          } else {
+            const options = {
+              hour: '2-digit',
+              minute: '2-digit',
+              day: 'numeric',
+              month: 'short'
+            };
+            timeString = date.toLocaleDateString('ru-RU', options);
+          }
+
+          tweetElement.innerHTML = `
+                        <div class="tweet-content">${escapeHtml(tweet.text)}</div>
+                        <div class="timestamp">${timeString}</div>
+                    `;
+
+          tweetsContainer.appendChild(tweetElement);
+        });
+      }
+
+      // Сохранение в localStorage
+      function saveTweets() {
+        localStorage.setItem('minimalTweets', JSON.stringify(tweets));
+      }
+
+      // Экранирование HTML
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // Примеры твитов, если нет сохраненных
+      if (tweets.length === 0) {
+        tweets = [
+          {
+            text: 'Не знаю, когда.',
+            timestamp: '2026-01-14T10:15:00.000Z'
+          },
+          {
+            text: 'Ни на кого нельзя положиться, всё приходится делать самому!',
+            timestamp: '2026-01-14T09:55:00.000Z'
+          },
+          {
+            text: 'Проще, проще.',
+            timestamp: '2026-01-13T19:00:00.000Z'
+          },
+          {
+            text: 'Меньше значит больше.',
+            timestamp: '2026-01-13T17:00:00.000Z'
+          },
+          {
+            text: 'Идеал достигнут не тогда, когда нечего добавить, а когда нечего убрать.',
+            timestamp: '2026-01-13T12:00:00.000Z'
+          }
+        ];
+        saveTweets();
+        renderTweets();
+      }
+    });
+  </script>
+</body>
+
+</html>
